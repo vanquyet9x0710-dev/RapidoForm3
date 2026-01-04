@@ -166,7 +166,7 @@ body{
   </div>
 </div>
 
-<form id="truckForm" action="https://script.google.com/macros/s/AKfycbwEczyn2FhOhwRR7F1o1iLqy5PTX-T8qpWu8lWnsaOr98nX0Cd2DS7Q-95fWZmyGEf1Mw/exec" method="post" enctype="multipart/form-data">
+<form id="truckForm" action="WEB_APP_URL_CỦA_BẠN" method="post" enctype="multipart/form-data">
 
 <!-- 🚛 THÔNG TIN XE -->
 <div class="card-box">
@@ -369,20 +369,46 @@ body{
 </form>
 </div>
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-  const soLuong = document.getElementById("soLuong");
-  const form = document.getElementById("truckForm");
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxkRtT68cAm8GLQqPg3kVntgyyHnxd2O8m-Jzjyb2Upgy_UgkLY1HFbU8ZW8VMUd1uUPQ/exec"; // Thay bằng URL Web App
 
-  if (form && soLuong) {
-    form.addEventListener("submit", function () {
-      // reset dropdown về 1 sau 300ms
-      setTimeout(function () {
-        soLuong.value = "1";
-      }, 300);
+document.getElementById("truckForm").addEventListener("submit", function(e){
+  e.preventDefault();
+  const status = document.getElementById("status");
+  const form = e.target;
+
+  const data = {};
+  const formData = new FormData(form);
+  formData.forEach((v,k)=>{data[k]=v;});
+
+  // Xử lý file Base64
+  const fileInput = document.querySelector('input[name="chung_tu"]');
+  if(fileInput && fileInput.files.length > 0){
+    const reader = new FileReader();
+    reader.onload = function(evt){
+      data.chung_tu = evt.target.result.split(",")[1]; // Base64
+      sendData(data);
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  } else {
+    data.chung_tu = "";
+    sendData(data);
+  }
+
+  function sendData(obj){
+    fetch(WEB_APP_URL, {
+      method:"POST",
+      body: JSON.stringify(obj)
+    })
+    .then(r=>r.text())
+    .then(t=>{
+      status.innerText = t;
+      form.reset();
+    })
+    .catch(err=>{
+      status.innerText = "❌ Lỗi gửi dữ liệu: "+err;
     });
   }
 });
 </script>
 </body>
 </html>
-
